@@ -1,0 +1,110 @@
+.TH MULTIPIPE 1 18-07-19
+.
+.SH NAME
+multipipe \- epoll example with FIFOs
+.
+.SH SYNOPSIS
+.SY multipipe
+.OP \-f format
+.OP \-c count
+.OP \-m mode
+.YS
+.
+.SH DESCRIPTION
+.B multipipe
+creates
+.I count
+FIFOs\(emnamed according to
+.IR format \(emand
+uses
+.BR epoll (7)
+on them to indicate which FIFOs have been written to.
+.
+.SH OPTIONS
+The following options are accepted by
+.BR mutlipipe :
+.
+.TP
+.BR \-\-format , " \-f "\c
+.I format
+A
+.BR printf (3)
+style format string which the FIFOs should be created as.
+.I format
+must contain exactly one format specifier of an integer.
+Defaults to \(oqpipe%d\(cq.
+.
+.TP
+.BR \-\-count , " \-c "\c
+.I count
+Number of FIFOs to create. The FIFO are named according to
+.B \-\-format
+with parameters 0 to
+.IR count \-1.
+Defaults to 10.
+.
+.TP
+.BR \-\-mode , " \-m "\c
+.I mode
+An octal mode which the FIFOs should have.
+Defaults to 0644.
+.
+.SH EXIT STATUS
+.TP
+.B 0
+Successful operation.
+.
+.TP
+.B 1
+Bad command line option.
+.
+.TP
+.B 2
+Could not create or open
+.BR pipe (7).
+.
+.TP
+.B 3
+Failed on configuration or waiting of
+.BR epoll (7)
+file descriptor.
+.
+.TP
+.B 4
+Failed to
+.BR read (2)
+file descriptor.
+.
+.SH EXAMPLE
+The following example shows a shell session of creating six pipes and writing
+to one of them.
+Note that due to
+.BR epoll (7),
+the process knows which pipe was written to.
+The output after the
+.BR printf (1)
+originates from the background
+.B multipipe
+process.
+.PP
+.RS
+.EX
+$ \fBmultipipe -f "mypipe%02d" -c 6 &\fP
+.PP
+$ \fBls\fP
+mypipe00
+mypipe01
+mypipe02
+mypipe03
+mypipe04
+mypipe05
+.PP
+$ \fBprintf "Hello, World!" >mypipe03\fP
+mypipe03: [Hello, World!]
+.EE
+.RE
+.
+.SH SEE ALSO
+.BR epoll (7),
+.BR pipe (7),
+.BR mkfifo (3)
